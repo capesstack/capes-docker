@@ -8,12 +8,10 @@ services:
     restart: unless-stopped
     image: mysql:5.7
     environment:
-      MYSQL_DATABASE: 'etherpad'
-      MYSQL_USER: 'etherpad'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
-#    ports:
-#      - "0.0.0.0:3306:3306"
+      MYSQL_DATABASE: etherpad
+      MYSQL_USER: etherpad
+      MYSQL_PASSWORD: etherpad_mysql_passphrase
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
     volumes:
       - ./volumes/etherpad/mysql:/var/lib/mysql
 
@@ -24,10 +22,10 @@ services:
     volumes:
       - ./volumes/gitea/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=gitea
-      - MYSQL_USER=gitea
-      - MYSQL_PASSWORD=password
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: gitea
+      MYSQL_USER: gitea
+      MYSQL_PASSWORD: gitea_mysql_passphrase
 
   elasticsearch:
     container_name: capes-thehive-elasticsearch
@@ -102,11 +100,22 @@ services:
   etherpad:
     container_name: capes-etherpad
     restart: unless-stopped
-    image: etherpad/etherpad:latest
-    volumes:
-      - ./etherpad/settings.json:/opt/etherpad/settings.json
+    image: tvelocity/etherpad-lite
+    # image: etherpad/etherpad:latest
+    #volumes:
+    #  - ./etherpad/test-settings.json:/opt/etherpad/settings.json
     ports:
-      - "5000:9001"
+      - "0.0.0.0:5000:9001"
+    environment:
+      - ETHERPAD_TITLE=CAPES
+      - ETHERPAD_PORT=9001
+      - ETHERPAD_ADMIN_PASSWORD=etherpad_admin_passphrase
+      - ETHERPAD_ADMIN_USER=admin
+      - ETHERPAD_DB_TYPE=mysql
+      - ETHERPAD_DB_HOST=etherpad-mysql
+      - ETHERPAD_DB_USER=etherpad
+      - ETHERPAD_DB_PASSWORD=etherpad_mysql_passphrase
+      - ETHERPAD_DB_NAME=etherpad
     depends_on:
       - etherpad-mysql
 
@@ -118,7 +127,7 @@ services:
       - elasticsearch
       - cortex
     ports:
-      - "9000:9000"
+      - "0.0.0.0:9000:9000"
 
   cortex:
     container_name: capes-cortex
@@ -126,7 +135,7 @@ services:
     depends_on:
       - elasticsearch
     ports:
-      - "9001:9001"
+      - "0.0.0.0:9001:9001"
 
   rocketchat:
     container_name: capes-rocketchat
