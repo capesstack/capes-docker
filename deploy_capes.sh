@@ -123,7 +123,7 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 
 # Adjust VM kernel setting for Elasticsearch
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
 
 # Update configuration files
 sed -i "s/etherpad_mysql_passphrase/$etherpad_mysql_passphrase/" test-docker-compose.yml
