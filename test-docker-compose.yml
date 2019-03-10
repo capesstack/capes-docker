@@ -58,8 +58,8 @@ services:
 
 ## CAPES Services ##
 
-  nginx:
-    container_name: capes-nginx
+  landing_page:
+    container_name: capes-landing_page
     restart: unless-stopped
     image: nginx:latest
     volumes:
@@ -101,9 +101,6 @@ services:
     container_name: capes-etherpad
     restart: unless-stopped
     image: tvelocity/etherpad-lite
-    # image: etherpad/etherpad:latest
-    #volumes:
-    #  - ./etherpad/test-settings.json:/opt/etherpad/settings.json
     ports:
       - "0.0.0.0:5000:9001"
     environment:
