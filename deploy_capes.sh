@@ -85,17 +85,17 @@ ExecReload=/bin/kill -s HUP $MAINPID
 WantedBy=multi-user.target
 EOF'
 
-# Generate the pid directory for Murmur:
-sudo bash -c 'cat > /etc/tmpfiles.d/murmur.conf <<EOF
-d /var/run/murmur 775 murmur murmur
-EOF'
-
 # Configure the Murmur SuperUser account
 sudo /opt/murmur/murmur.x86 -ini /etc/murmur.ini -supw $mumble_passphrase
 
 # Prepare the service environment
 sudo systemd-tmpfiles --create /etc/tmpfiles.d/murmur.conf
 sudo systemctl daemon-reload
+
+# Generate the pid directory for Murmur:
+sudo bash -c 'cat > /etc/tmpfiles.d/murmur.conf <<EOF
+d /var/run/murmur 775 murmur murmur
+EOF'
 
 # Set Mumble to start on boot
 sudo systemctl enable murmur.service
@@ -115,6 +115,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 # Create non-Root users to manage Docker
 sudo groupadd docker
 sudo usermod -aG docker $USER
+newgrp - docker
 
 # Set Docker to start on boot
 sudo systemctl enable docker.service
@@ -130,9 +131,14 @@ sed -i "s/etherpad_mysql_passphrase/$etherpad_mysql_passphrase/" test-docker-com
 sed -i "s/etherpad_admin_passphrase/$etherpad_admin_passphrase/" test-docker-compose.yml
 sed -i "s/etherpad_user_passphrase/$etherpad_user_passphrase/" test-docker-compose.yml
 sed -i "s/gitea_mysql_passphrase/$gitea_mysql_passphrase/" test-docker-compose.yml
+sed -i "s/host-ip/$IP/" landing_page/index.html
+
+# Update Elasticsearch's folder permissions
+mkdir -p volumes/elasticsearch
+chown -R 1000:1000 volumes/elasticsearch
 
 # Run Docker Compose to create all of the other containers
-sudo docker-compose -f test-docker-compose.yml up -d
+docker-compose -f test-docker-compose.yml up -d
 
 ################################
 ### Firewall Considerations ####

@@ -13,14 +13,14 @@ services:
       MYSQL_PASSWORD: etherpad_mysql_passphrase
       MYSQL_RANDOM_ROOT_PASSWORD: 1
     volumes:
-      - ./volumes/etherpad/mysql:/var/lib/mysql
+      - ./volumes/etherpad/mysql:/var/lib/mysql:z
 
   gitea-mysql:
     container_name: capes-gitea-mysql
     restart: unless-stopped
     image: mysql:5.7
     volumes:
-      - ./volumes/gitea/mysql:/var/lib/mysql
+      - ./volumes/gitea/mysql:/var/lib/mysql:z
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 1
       MYSQL_DATABASE: gitea
@@ -45,15 +45,15 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+      - ./volumes/elasticsearch:/usr/share/elasticsearch/data:z
 
   rocketchat-mongo:
     container_name: capes-rocketchat-mongo
     restart: unless-stopped
     image: mongo:latest
     volumes:
-      - ./volumes/rocketchat/mongo:/data/db
-      - ./volumes/rocketchat/mongo/dump:/dump
+      - ./volumes/rocketchat/mongo:/data/db:z
+      - ./volumes/rocketchat/mongo/dump:/dump:z
     command: mongod --smallfiles
 
 ## CAPES Services ##
@@ -63,7 +63,7 @@ services:
     restart: unless-stopped
     image: nginx:latest
     volumes:
-      - ./landing_page:/usr/share/nginx/html
+      - ./landing_page:/usr/share/nginx/html:z
     ports:
       - "80:80"
 
@@ -89,9 +89,9 @@ services:
     restart: unless-stopped
     image: gitea/gitea:latest
     volumes:
-      - ./volumes/gitea/gitea_app:/data
+      - ./volumes/gitea/gitea_app:/data:z
     ports:
-      - "22:22"
+      - "2222:22"
       - "4000:3000"
     environment:
       - VIRTUAL_PORT=3000
