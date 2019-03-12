@@ -5,15 +5,15 @@
 ################################
 
 # Create passphrases and set them as variables
-etherpad_user_passphrase=`date +%s | sha256sum | base64 | head -c 32`
+etherpad_user_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 sleep 1
-etherpad_mysql_passphrase=`date +%s | sha256sum | base64 | head -c 32`
+etherpad_mysql_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 sleep 1
-etherpad_admin_passphrase=`date +%s | sha256sum | base64 | head -c 32`
+etherpad_admin_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 sleep 1
-gitea_mysql_passphrase=`date +%s | sha256sum | base64 | head -c 32`
+gitea_mysql_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 sleep 1
-mumble_passphrase=`date +%s | sha256sum | base64 | head -c 32`
+mumble_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 
 # Write the passphrases to a file for reference. You should store this securely in accordance with your local security policy.
 for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > ~/capes_credentials.txt
@@ -105,7 +105,7 @@ sudo systemctl enable murmur.service
 sudo systemctl start murmur.service
 
 # Configure the SuperUser account
-sudo /opt/murmur/murmur.x86 -ini /etc/murmur.ini -supw $mumblepassphrase
+sudo /opt/murmur/murmur.x86 -ini /etc/murmur.ini -supw "$mumble_passphrase"
 
 ################################
 ########## Containers ##########
@@ -120,7 +120,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 # You'll still need to run sudo docker [command] until you log out and back in OR run "newgrp - docker"
 # The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing
 sudo groupadd docker
-sudo usermod -aG docker $USER
+sudo usermod -aG docker "$USER"
 
 # Set Docker to start on boot
 sudo systemctl enable docker.service
@@ -156,10 +156,11 @@ sudo /usr/local/bin/docker-compose -f test-docker-compose.yml up -d
 # Port 4000 - Gitea
 # Port 5000 - Etherpad
 # Port 5601 - Kibana
+# Port 6000 - Cyberchef
 # Port 7000 - Mumble
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-sudo firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=7000/tcp --add-port=7000/udp --add-port=9000/tcp --add-port=9001/tcp --permanent
+sudo firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=6000/tcp --add-port=7000/tcp --add-port=7000/udp --add-port=9000/tcp --add-port=9001/tcp --permanent
 sudo firewall-cmd --reload
 
 ################################
