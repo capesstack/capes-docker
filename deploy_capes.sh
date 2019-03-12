@@ -119,7 +119,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 # Create non-Root users to manage Docker
 sudo groupadd docker
 sudo usermod -aG docker $USER
-newgrp - docker
+newgrp $USER docker
 cd capes-docker
 
 # Set Docker to start on boot
