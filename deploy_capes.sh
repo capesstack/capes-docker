@@ -29,7 +29,7 @@ echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 ################################
 
 # Prepare the environment
-sudo yum -y install bzip2 && yum -y update
+sudo yum -y install bzip2
 sudo groupadd -r murmur
 sudo useradd -r -g murmur -m -d /var/lib/murmur -s /sbin/nologin murmur
 sudo mkdir -p /var/log/murmur
