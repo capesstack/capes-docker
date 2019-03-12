@@ -29,7 +29,7 @@ echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 ################################
 
 # Prepare the environment
-sudo yum -y install bzip2
+sudo yum -y install bzip2 && yum -y update
 sudo groupadd -r murmur
 sudo useradd -r -g murmur -m -d /var/lib/murmur -s /sbin/nologin murmur
 sudo mkdir -p /var/log/murmur
@@ -38,7 +38,7 @@ sudo chmod 0770 /var/log/murmur
 
 # Download binaries
 curl -OL https://github.com/mumble-voip/mumble/releases/download/1.2.19/murmur-static_x86-1.2.19.tar.bz2
-tar xjf murmur-static_x86-1.2.19.tar.bz2
+tar vxjf murmur-static_x86-1.2.19.tar.bz2
 sudo mkdir -p /opt/murmur
 sudo cp -r murmur-static_x86-1.2.19/* /opt/murmur
 sudo cp murmur-static_x86-1.2.19/murmur.ini /etc/murmur.ini
@@ -50,6 +50,10 @@ sudo sed -i 's/\#logfile=murmur\.log/logfile=\/var\/log\/murmur\/murmur\.log/' /
 sudo sed -i 's/\#pidfile=/pidfile=\/var\/run\/murmur\/murmur\.pid/' /etc/murmur.ini
 sudo sed -i 's/\#registerName=Mumble\ Server/registerName=CAPES\ -\ Mumble\ Server/' /etc/murmur.ini
 sudo sed -i 's/port=64738/port=7000/' /etc/murmur.ini
+
+# Configure the firewall
+sudo firewall-cmd --add-port=7000/tcp --add-port=7000/udp --permanent
+sudo firewall-cmd --reload
 
 # Rotate logs
 sudo bash -c 'cat > /etc/logrotate.d/murmur <<EOF
@@ -85,23 +89,23 @@ ExecReload=/bin/kill -s HUP $MAINPID
 WantedBy=multi-user.target
 EOF'
 
-# Configure the Murmur SuperUser account
-sudo /opt/murmur/murmur.x86 -ini /etc/murmur.ini -supw $mumble_passphrase
-
-# Prepare the service environment
-sudo systemd-tmpfiles --create /etc/tmpfiles.d/murmur.conf
-sudo systemctl daemon-reload
-
 # Generate the pid directory for Murmur:
 sudo bash -c 'cat > /etc/tmpfiles.d/murmur.conf <<EOF
 d /var/run/murmur 775 murmur murmur
 EOF'
 
-# Set Mumble to start on boot
+# Prepare the service environment
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/murmur.conf
+sudo systemctl daemon-reload
+
+# Set Murmur to start on boot
 sudo systemctl enable murmur.service
 
-# Start the Muble services
+# Start the Murmur service
 sudo systemctl start murmur.service
+
+# Configure the SuperUser account
+sudo /opt/murmur/murmur.x86 -ini /etc/murmur.ini -supw $mumblepassphrase
 
 ################################
 ########## Containers ##########
@@ -116,6 +120,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo groupadd docker
 sudo usermod -aG docker $USER
 newgrp - docker
+cd capes-docker
 
 # Set Docker to start on boot
 sudo systemctl enable docker.service
@@ -134,8 +139,10 @@ sed -i "s/gitea_mysql_passphrase/$gitea_mysql_passphrase/" test-docker-compose.y
 sed -i "s/host-ip/$IP/" landing_page/index.html
 
 # Update Elasticsearch's folder permissions
-mkdir -p volumes/elasticsearch
-chown -R 1000:1000 volumes/elasticsearch
+#mkdir -p volumes/elasticsearch
+#chown -R 1000:1000 volumes/elasticsearch
+mkdir -p /var/lib/docker/volumes/elasticsearch/_data
+chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Run Docker Compose to create all of the other containers
 docker-compose -f test-docker-compose.yml up -d
