@@ -51,10 +51,6 @@ sudo sed -i 's/\#pidfile=/pidfile=\/var\/run\/murmur\/murmur\.pid/' /etc/murmur.
 sudo sed -i 's/\#registerName=Mumble\ Server/registerName=CAPES\ -\ Mumble\ Server/' /etc/murmur.ini
 sudo sed -i 's/port=64738/port=7000/' /etc/murmur.ini
 
-# Configure the firewall
-sudo firewall-cmd --add-port=7000/tcp --add-port=7000/udp --permanent
-sudo firewall-cmd --reload
-
 # Rotate logs
 sudo bash -c 'cat > /etc/logrotate.d/murmur <<EOF
 /var/log/murmur/*log {
