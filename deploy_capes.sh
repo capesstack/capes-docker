@@ -117,10 +117,10 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 
 # Create non-Root users to manage Docker
+# You'll still need to run sudo docker [command] until you log out and back in OR run "newgrp - docker"
+# The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing
 sudo groupadd docker
 sudo usermod -aG docker $USER
-newgrp $USER docker
-cd capes-docker
 
 # Set Docker to start on boot
 sudo systemctl enable docker.service
@@ -141,11 +141,11 @@ sed -i "s/host-ip/$IP/" landing_page/index.html
 # Update Elasticsearch's folder permissions
 #mkdir -p volumes/elasticsearch
 #chown -R 1000:1000 volumes/elasticsearch
-mkdir -p /var/lib/docker/volumes/elasticsearch/_data
-chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
+sudo mkdir -p /var/lib/docker/volumes/elasticsearch/_data
+sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Run Docker Compose to create all of the other containers
-docker-compose -f test-docker-compose.yml up -d
+sudo /usr/local/bin/docker-compose -f test-docker-compose.yml up -d
 
 ################################
 ### Firewall Considerations ####
