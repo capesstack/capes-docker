@@ -128,10 +128,10 @@ sudo systemctl start docker.service
 sudo sysctl -w vm.max_map_count=262144
 
 # Update configuration files
-sed -i "s/etherpad_mysql_passphrase/$etherpad_mysql_passphrase/" test-docker-compose.yml
-sed -i "s/etherpad_admin_passphrase/$etherpad_admin_passphrase/" test-docker-compose.yml
-sed -i "s/etherpad_user_passphrase/$etherpad_user_passphrase/" test-docker-compose.yml
-sed -i "s/gitea_mysql_passphrase/$gitea_mysql_passphrase/" test-docker-compose.yml
+sed -i "s/etherpad_mysql_passphrase/$etherpad_mysql_passphrase/" docker-compose.yml
+sed -i "s/etherpad_admin_passphrase/$etherpad_admin_passphrase/" docker-compose.yml
+sed -i "s/etherpad_user_passphrase/$etherpad_user_passphrase/" docker-compose.yml
+sed -i "s/gitea_mysql_passphrase/$gitea_mysql_passphrase/" docker-compose.yml
 sed -i "s/host-ip/$IP/" landing_page/index.html
 
 # Update Elasticsearch's folder permissions
@@ -141,7 +141,7 @@ sudo mkdir -p /var/lib/docker/volumes/elasticsearch/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Run Docker Compose to create all of the other containers
-sudo /usr/local/bin/docker-compose -f test-docker-compose.yml up -d
+sudo /usr/local/bin/docker-compose -f docker-compose.yml up -d
 
 ################################
 ### Firewall Considerations ####
