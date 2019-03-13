@@ -8,24 +8,24 @@ services:
     restart: unless-stopped
     image: mysql:5.7
     environment:
-      MYSQL_DATABASE: 'etherpad'
-      MYSQL_USER: 'etherpad'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DATABASE: etherpad
+      MYSQL_USER: etherpad
+      MYSQL_PASSWORD: etherpad_mysql_passphrase
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
     volumes:
-      - ./volumes/etherpad/mysql:/var/lib/mysql
+      - /var/lib/docker/volumes/mysql/etherpad/_data:/var/lib/mysql:z
 
   gitea-mysql:
     container_name: capes-gitea-mysql
     restart: unless-stopped
     image: mysql:5.7
     volumes:
-      - ./volumes/gitea/mysql:/var/lib/mysql
+      - /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=gitea
-      - MYSQL_USER=gitea
-      - MYSQL_PASSWORD=password
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: gitea
+      MYSQL_USER: gitea
+      MYSQL_PASSWORD: gitea_mysql_passphrase
 
   elasticsearch:
     container_name: capes-thehive-elasticsearch
@@ -45,25 +45,25 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+      - /var/lib/docker/volumes/elasticsearch/_data:/usr/share/elasticsearch/data:z
 
   rocketchat-mongo:
     container_name: capes-rocketchat-mongo
     restart: unless-stopped
     image: mongo:latest
     volumes:
-      - ./volumes/rocketchat/mongo:/data/db
-      - ./volumes/rocketchat/mongo/dump:/dump
+      - /var/lib/docker/volumes/rocketchat/_data:/data/db:z
+      - /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z
     command: mongod --smallfiles
 
 ## CAPES Services ##
 
-  nginx:
-    container_name: capes-nginx
+  landing_page:
+    container_name: capes-landing_page
     restart: unless-stopped
     image: nginx:latest
     volumes:
-      - ./landing_page:/usr/share/nginx/html
+      - ./landing_page:/usr/share/nginx/html:z
     ports:
       - "80:80"
 
@@ -72,7 +72,7 @@ services:
     restart: unless-stopped
     image: portainer/portainer:latest
     volumes:
-      - ./volumes/portainer:/data portainer/portainer
+      - /var/lib/docker/volumes/portainer/_data:/data portainer/portainer
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "2000:9000"
@@ -82,16 +82,16 @@ services:
     restart: unless-stopped
     image: mpepping/cyberchef:latest
     ports:
-      - "7000:8000"
+      - "8000:8000"
 
   gitea:
     container_name: capes-gitea
     restart: unless-stopped
     image: gitea/gitea:latest
     volumes:
-      - ./volumes/gitea/gitea_app:/data
+      - /var/lib/docker/volumes/gitea/_data:/data:z
     ports:
-      - "22:22"
+      - "2222:22"
       - "4000:3000"
     environment:
       - VIRTUAL_PORT=3000
@@ -100,11 +100,19 @@ services:
   etherpad:
     container_name: capes-etherpad
     restart: unless-stopped
-    image: etherpad/etherpad:latest
-    volumes:
-      - ./etherpad/settings.json:/opt/etherpad/settings.json
+    image: tvelocity/etherpad-lite
     ports:
       - "0.0.0.0:5000:9001"
+    environment:
+      - ETHERPAD_TITLE=CAPES
+      - ETHERPAD_PORT=9001
+      - ETHERPAD_ADMIN_PASSWORD=etherpad_admin_passphrase
+      - ETHERPAD_ADMIN_USER=admin
+      - ETHERPAD_DB_TYPE=mysql
+      - ETHERPAD_DB_HOST=etherpad-mysql
+      - ETHERPAD_DB_USER=etherpad
+      - ETHERPAD_DB_PASSWORD=etherpad_mysql_passphrase
+      - ETHERPAD_DB_NAME=etherpad
     depends_on:
       - etherpad-mysql
 
