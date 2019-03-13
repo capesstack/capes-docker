@@ -17,6 +17,8 @@ sudo sh deploy_capes.sh
 
 After deployment, you can go to http://[host-ip] to view the services.
 
+Passwords are written to `/root/capes_credentials.txt` in the event that they're needed.
+
 To do:
 * Documentation (yay)
 * Add stack monitoring with the Elastic Stack
