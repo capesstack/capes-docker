@@ -16,7 +16,9 @@ sleep 1
 mumble_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 
 # Write the passphrases to a file for reference. You should store this securely in accordance with your local security policy.
-for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > ~/capes_credentials.txt
+# As much as it pains me to admit it, @dcode helped me with the USER_HOME variable to get the creds written to the unprivileged user's home directory
+USER_HOME=$(getent passwd 1000 | cut -d':' -f6)
+for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > $USER_HOME/capes_credentials.txt
 
 # Set your IP address as a variable. This is for instructions below.
 IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
