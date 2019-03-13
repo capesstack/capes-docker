@@ -16,7 +16,7 @@ sleep 1
 mumble_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 
 # Write the passphrases to a file for reference. You should store this securely in accordance with your local security policy.
-for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > /home/"$USER"/capes_credentials.txt
+for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > ~/capes_credentials.txt
 
 # Set your IP address as a variable. This is for instructions below.
 IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
