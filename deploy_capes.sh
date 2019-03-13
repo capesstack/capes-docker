@@ -16,7 +16,7 @@ sleep 1
 mumble_passphrase=$(date +%s | sha256sum | base64 | head -c 32)
 
 # Write the passphrases to a file for reference. You should store this securely in accordance with your local security policy.
-for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > ~/capes_credentials.txt
+for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_passphrase,gitea_mysql_passphrase,mumble_passphrase}; do echo "$i = ${!i}"; done > /home/"$USER"/capes_credentials.txt
 
 # Set your IP address as a variable. This is for instructions below.
 IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
@@ -152,11 +152,11 @@ sudo /usr/local/bin/docker-compose -f test-docker-compose.yml up -d
 # Port 4000 - Gitea
 # Port 5000 - Etherpad
 # Port 5601 - Kibana
-# Port 6000 - Cyberchef
 # Port 7000 - Mumble
+# Port 8000 - Cyberchef
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-sudo firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=6000/tcp --add-port=7000/tcp --add-port=7000/udp --add-port=9000/tcp --add-port=9001/tcp --permanent
+sudo firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=7000/tcp --add-port=7000/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
 sudo firewall-cmd --reload
 
 ################################

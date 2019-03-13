@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
     image: mpepping/cyberchef:latest
     ports:
-      - "6000:8000"
+      - "8000:8000"
 
   gitea:
     container_name: capes-gitea
