@@ -13,7 +13,7 @@ Please see below for Build, Operate, Maintain specifics on the different web app
 ## Requirements
 There has not been extensive testing, but all of these services have run without issue on a single virtual machine with approximately 20 users and no issue for a week. That said, your mileage may vary.
 
-While the OS version isn't a hard requirement, all testing and development work has been done with `CentOS 7.5.1810 (Core)`.
+While the OS version isn't a hard requirement, all testing and development work has been done with `CentOS 7.6.1810 (Core)`.
 
 | Component | Number |
 | - | - |
@@ -48,7 +48,7 @@ It is a poor practice to deploy self-signed SSL certificates because it teaches 
 ## Installation
 Generally, the CAPES ecosystem is meant to run as a whole, so the preferred usage will be to install CAPES with the `deploy_capes.sh` script in the root directory of this repository. Additionally, if there is a service that you do not want, you can comment that service out of the docker-compose file as they are documented with service tags.
 
-### Build your OS (CentOS 7.5)
+### Build your OS (CentOS 7.6)
 This is meant to help those who need a step-by-step build of CentOS, securing SSh, and getting ready to grab CAPES. If you don't need this guide, skip on down to [Get CAPES](#get-capes).
 1. Download the latest version of [CentOS Minimal](http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso)
 1. Build a VM or a physical system with 4 cores, 8 GB of RAM, and a 20 GB HDD at a minimum
@@ -95,7 +95,7 @@ This is meant to help those who need a step-by-step build of CentOS, securing SS
 ## Get CAPES
 Finally, here we go.
 
-### CentOS 7.5
+### CentOS 7.6
 ```
 sudo yum -y install git
 git clone https://github.com/capesstack/capes-docker.git
