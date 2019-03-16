@@ -120,6 +120,8 @@ services:
     container_name: capes-thehive
     restart: unless-stopped
     image: thehiveproject/thehive:latest
+    environment:
+      - CORTEX_URL=capes-cortex
     depends_on:
       - elasticsearch
       - cortex
