@@ -1,5 +1,5 @@
 # TheHive
-TheHive build script for CentOS 7.3.
+TheHive build script for CentOS 7.6.
 
 ## Usage
 `$ sudo sh thehive_deploy.sh`
