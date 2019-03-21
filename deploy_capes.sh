@@ -63,15 +63,11 @@ sed -i "s/host-ip/$IP/" landing_page/index.html
 sudo mkdir -p /var/lib/docker/volumes/elasticsearch/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
-# Build the docker volume for Mumble
-sudo docker volume create --name mumble-data
+# Build the container for Mumble
+sudo docker run -d --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e "SUPW=$mumble_passphrase" extra/mumble:latest
 
 # Run Docker Compose to create all of the other containers
 sudo /usr/local/bin/docker-compose -f docker-compose.yml up -d
-
-# Set the passphrase for the SuperUser account in Mumble
-# sudo docker exec -it capes-mumble supw
-# $mumble_passphrase
 
 ################################
 ### Firewall Considerations ####
