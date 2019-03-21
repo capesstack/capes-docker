@@ -148,3 +148,15 @@ services:
       - rocketchat-mongo
     ports:
       - "3000:3000"
+
+  mumble:
+    image: phlak/mumble:latest
+    container_name: capes-mumble
+    restart: unless-stopped
+    ports:
+      - "64738:64738"
+    volumes:
+      - mumble-data:/etc/mumble:z
+
+volumes:
+  mumble-data:
