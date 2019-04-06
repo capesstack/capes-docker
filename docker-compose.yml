@@ -80,9 +80,9 @@ services:
   cyberchef:
     container_name: capes-cyberchef
     restart: unless-stopped
-    image: mpepping/cyberchef:latest
+    image: remnux/cyberchef:latest
     ports:
-      - "8000:8000"
+      - "8000:8080"
 
   gitea:
     container_name: capes-gitea
