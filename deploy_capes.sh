@@ -27,17 +27,13 @@ IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
 echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 
 ################################
-########## Containers ##########
+########### Docker #############
 ################################
 sudo yum install -y docker
-sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-
-# Apply executable permissions to the Docker Compose binary
-sudo chmod +x /usr/local/bin/docker-compose
 
 # Create non-Root users to manage Docker
 # You'll still need to run sudo docker [command] until you log out and back in OR run "newgrp - docker"
-# The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing
+# The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using sudo until a reboot.
 sudo groupadd docker
 sudo usermod -aG docker "$USER"
 
@@ -47,27 +43,59 @@ sudo systemctl enable docker.service
 # Start the Docker services
 sudo systemctl start docker.service
 
-# Adjust VM kernel setting for Elasticsearch
-sudo sysctl -w vm.max_map_count=262144
-
-# Update configuration files
-sed -i "s/etherpad_mysql_passphrase/$etherpad_mysql_passphrase/" docker-compose.yml
-sed -i "s/etherpad_admin_passphrase/$etherpad_admin_passphrase/" docker-compose.yml
-sed -i "s/etherpad_user_passphrase/$etherpad_user_passphrase/" docker-compose.yml
-sed -i "s/gitea_mysql_passphrase/$gitea_mysql_passphrase/" docker-compose.yml
-sed -i "s/host-ip/$IP/" landing_page/index.html
+# Create the CAPES network and data volume
+sudo docker network create capes
+sudo docker volume create portainer_data
 
 # Update Elasticsearch's folder permissions
-#mkdir -p volumes/elasticsearch
-#chown -R 1000:1000 volumes/elasticsearch
 sudo mkdir -p /var/lib/docker/volumes/elasticsearch/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
-# Build the container for Mumble
-sudo docker run -d --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e "SUPW=$mumble_passphrase" extra/mumble:latest
+# Adjust VM kernel setting for Elasticsearch
+sudo sysctl -w vm.max_map_count=262144
 
-# Run Docker Compose to create all of the other containers
-sudo /usr/local/bin/docker-compose -f docker-compose.yml up -d
+## CAPES Databases ##
+
+# Etherpad MYSQL Container
+sudo docker run -d  --network capes --restart unless-stopped --name capes-etherpad-mysql -v /var/lib/docker/volumes/mysql/etherpad/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=etherpad" -e "MYSQL_USER=etherpad" -e MYSQL_PASSWORD=$etherpad_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
+
+# Gitea MYSQL Container
+sudo docker run -d  --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
+
+# TheHive & Cortex Elasticsearch Container
+sudo docker run -d  --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
+
+# Rocketchat MongoDB Container
+sudo docker run -d  --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles
+
+## CAPES Services ##
+
+# Portainer Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
+
+# Nginx Service
+sudo docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $PWD/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
+
+# Cyberchef Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
+
+# Gitea Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 4000:3000 gitea/gitea:latest
+
+# Etherpad Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=$etherpad_admin_passphrase -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=$etherpad_mysql_passphrase -e "ETHERPAD_DB_NAME=etherpad" -p 5000:9001 tvelocity/etherpad-lite:latest
+
+# TheHive Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-thehive -e CORTEX_URL=capes-cortex -p 9000:9000 thehiveproject/thehive:latest --es-hostname capes-thehive-elasticsearch --cortex-hostname capes-cortex
+
+# Cortex Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+
+# Rocketchat Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e "ROOT_URL=http://localhost:3000" -p 3000:3000 rocketchat/rocket.chat:latest
+
+# Mumble Service
+sudo docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
 
 ################################
 ### Firewall Considerations ####
