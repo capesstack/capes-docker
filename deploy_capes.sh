@@ -48,7 +48,8 @@ sudo docker network create capes
 sudo docker volume create portainer_data
 
 # Update Elasticsearch's folder permissions
-sudo mkdir -p /var/lib/docker/volumes/elasticsearch/_data
+sudo mkdir -p /var/lib/docker/volumes/elasticsearch/thehive/_data
+sudo mkdir -p /var/lib/docker/volumes/elasticsearch/capes/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Adjust VM kernel setting for Elasticsearch
@@ -63,7 +64,7 @@ sudo docker run -d  --network capes --restart unless-stopped --name capes-etherp
 sudo docker run -d  --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # TheHive & Cortex Elasticsearch Container
-sudo docker run -d  --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
+sudo docker run -d  --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
 
 # Rocketchat MongoDB Container
 sudo docker run -d  --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles
@@ -74,7 +75,7 @@ sudo docker run -d  --network capes --restart unless-stopped --name capes-rocket
 sudo docker run -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
 
 # Nginx Service
-sudo docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $PWD/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
+sudo docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
 
 # Cyberchef Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
@@ -96,6 +97,17 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-rocketc
 
 # Mumble Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
+
+## CAPES Monitoring ##
+
+# CAPES Elasticsearch
+sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch -v /var/lib/docker/volumes/elasticsearch/capes/_data:/usr/share/elasticsearch/data:z -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "cluster.name=capes" docker.elastic.co/elasticsearch/elasticsearch:7.0.0
+
+# CAPES Kibana
+sudo docker run -d --network capes --restart unless-stopped --name capes-kibana --network capes -p 5601:5601 --link capes-elasticsearch:elasticsearch docker.elastic.co/kibana/kibana:7.0.0
+
+# CAPES Heartbeat
+sudo docker run -d --network capes --restart unless-stopped --name capes-heartbeat --network capes --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.0.0 --strict.perms=false -e -E output.elasticsearch.hosts=["capes-elasticsearch:9200"]
 
 ################################
 ### Firewall Considerations ####
