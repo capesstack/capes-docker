@@ -11,7 +11,7 @@ heartbeat.monitors:
     - http://capes-gitea:3000
     - http://capes-etherpad:9001
     - http://capes-thehive:9000
-    - http://capes-cortex:9000
+#    - http://capes-cortex:9000
     - http://capes-rocketchat:3000
 
 - type: icmp

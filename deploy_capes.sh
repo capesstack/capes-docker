@@ -26,6 +26,9 @@ IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
 # Update your Host file
 echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 
+# Update the landing page index file
+sed -i "s/host-ip/$IP/" landing_page/index.html
+
 ################################
 ########### Docker #############
 ################################
@@ -90,7 +93,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-etherpa
 sudo docker run -d --network capes --restart unless-stopped --name capes-thehive -e CORTEX_URL=capes-cortex -p 9000:9000 thehiveproject/thehive:latest --es-hostname capes-thehive-elasticsearch --cortex-hostname capes-cortex
 
 # Cortex Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+# sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
 
 # Rocketchat Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e "ROOT_URL=http://localhost:3000" -p 3000:3000 rocketchat/rocket.chat:latest
