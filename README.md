@@ -21,5 +21,6 @@ Passwords are written to `~/capes_credentials.txt` in the event that they're nee
 
 To do:
 * SSL reverse proxy
+* Moar Beats (Metric, audit)
 * Documentation (yay)
 * Integrate additional services from TheHive Project (Hippocampe, Cortex)
