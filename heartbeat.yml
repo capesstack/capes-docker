@@ -18,6 +18,7 @@ heartbeat.monitors:
   schedule: '@every 5s'
   hosts:
     - capes-mumble
+    - capes-heartbeat
     - capes-etherpad-mysql
     - capes-gitea-mysql
     - capes-rocketchat-mongo
