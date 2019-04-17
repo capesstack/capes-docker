@@ -54,7 +54,6 @@ sudo docker volume create portainer_data
 sudo mkdir -p /var/lib/docker/volumes/elasticsearch/thehive/_data
 sudo mkdir -p /var/lib/docker/volumes/elasticsearch{-1,-2,-3}/capes/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch{-1,-2,-3}
-#sudo mkdir -p /var/lib/docker/volumes/elasticsearch/capes/_data
 sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Update permissionso on the Heartbeat and Metricbeat yml file
@@ -111,9 +110,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-mumble 
 
 ## CAPES Monitoring ##
 
-# CAPES Elasticsearch
-#sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch -v /var/lib/docker/volumes/elasticsearch/capes/_data:/usr/share/elasticsearch/data:z -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "cluster.name=capes" docker.elastic.co/elasticsearch/elasticsearch:7.0.0
-
+# CAPES Elasticsearch Nodes
 sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-1 -v /var/lib/docker/volumes/elasticsearch-1/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -p 9200:9200 -p 9300:9300 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-1" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" docker.elastic.co/elasticsearch/elasticsearch:7.0.0
 
 sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-2 -v /var/lib/docker/volumes/elasticsearch-2/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-2" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-3" docker.elastic.co/elasticsearch/elasticsearch:7.0.0

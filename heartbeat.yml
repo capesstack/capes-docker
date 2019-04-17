@@ -26,4 +26,4 @@ heartbeat.monitors:
     - capes-rocketchat-mongo
 
 output.elasticsearch:
-  hosts: '${ELASTICSEARCH_HOSTS:capes-elasticsearch:9200}'
+  hosts: '${ELASTICSEARCH_HOSTS:capes-elasticsearch-1:9200}'
