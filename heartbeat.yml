@@ -2,7 +2,9 @@ heartbeat.monitors:
 - type: http
   schedule: '@every 5s'
   urls:
-    - http://capes-elasticsearch:9200
+    - http://capes-elasticsearch-1:9200
+    - http://capes-elasticsearch-2:9200
+    - http://capes-elasticsearch-3:9200
     - http://capes-kibana:5601
     - http://capes-thehive-elasticsearch:9200
     - http://capes-portainer:9000
