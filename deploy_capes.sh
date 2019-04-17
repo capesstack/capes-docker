@@ -126,6 +126,15 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-heartbe
 # CAPES Metricbeat
 sudo docker run -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
+# Adjust the Elasticsearch bucket size
+curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+{
+    "persistent" : {
+        "search.max_buckets" : "100000000"
+    }
+}
+'
+
 ################################
 ### Firewall Considerations ####
 ################################

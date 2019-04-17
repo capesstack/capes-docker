@@ -21,6 +21,7 @@ heartbeat.monitors:
   hosts:
     - capes-mumble
     - capes-heartbeat
+    - capes-metricbeat
     - capes-etherpad-mysql
     - capes-gitea-mysql
     - capes-rocketchat-mongo
