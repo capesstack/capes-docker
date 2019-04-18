@@ -64,6 +64,9 @@ sudo chmod 0644 metricbeat.yml
 
 # Adjust VM kernel setting for Elasticsearch
 sudo sysctl -w vm.max_map_count=262144
+sudo bash -c 'cat >> /etc/sysctl.conf <<EOF
+vm.max_map_count=262144
+EOF'
 
 ## CAPES Databases ##
 
