@@ -130,6 +130,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-heartbe
 sudo docker run -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # Wait for Elasticsearch to become available
+echo "Elasticsearch takes a negotiate it's cluster settings and come up. Give it a minute."
 while true
 do
   STATUS=$(curl -sL -o /dev/null -w '%{http_code}' http://127.0.0.1:9200)
