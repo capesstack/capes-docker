@@ -94,7 +94,7 @@ sudo docker run -d  --network capes --restart unless-stopped --name capes-landin
 sudo docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
 
 # Gitea Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=4000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 4000:4000 gitea/gitea:latest
+sudo docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:latest
 
 # Etherpad Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=$etherpad_admin_passphrase -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=$etherpad_mysql_passphrase -e "ETHERPAD_DB_NAME=etherpad" -p 5000:9001 tvelocity/etherpad-lite:latest
@@ -106,7 +106,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-thehive
 # sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
 
 # Rocketchat Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e "ROOT_URL=http://localhost:3000" -p 3000:3000 rocketchat/rocket.chat:latest
+sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e ROOT_URL=http://$IP:4000 -p 4000:3000 rocketchat/rocket.chat:latest
 
 # Mumble Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
