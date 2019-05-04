@@ -127,7 +127,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-kibana 
 sudo docker run -d --network capes --restart unless-stopped --name capes-heartbeat --network capes --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # CAPES Metricbeat
-sudo docker run -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+sudo docker run --privileged -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # Wait for Elasticsearch to become available
 echo "Elasticsearch takes a bit to negotiate it's cluster settings and come up. Give it a minute."
