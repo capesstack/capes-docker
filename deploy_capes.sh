@@ -85,7 +85,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-rocketc
 ## CAPES Services ##
 
 # Portainer Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
+sudo docker run  --privileged -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
 
 # Nginx Service
 sudo docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
