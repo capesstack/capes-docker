@@ -107,7 +107,7 @@ sudo docker run -d --network capes --restart unless-stopped --name capes-thehive
 # sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
 
 # Rocketchat Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e MONGO_OPLOG_URL=mongodb://capes-rocketchat-mongo:27017/local?replSet=rs01 -e ROOT_URL=http://192.168.132.186:4000 -p 4000:3000 rocketchat/rocket.chat:latest
+sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e MONGO_OPLOG_URL=mongodb://capes-rocketchat-mongo:27017/local?replSet=rs01 -e ROOT_URL=http://$IP:4000 -p 4000:3000 rocketchat/rocket.chat:latest
 
 # Mumble Service
 sudo docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
