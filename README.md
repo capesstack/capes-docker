@@ -2,8 +2,6 @@
 
 This is the repo for containerized CAPES. This will replace the non-containerized version.
 
-Beta version!
-
 ## Requirements
 * Clean CentOS system
 
