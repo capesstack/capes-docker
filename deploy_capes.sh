@@ -24,7 +24,7 @@ for i in {etherpad_user_passphrase,etherpad_mysql_passphrase,etherpad_admin_pass
 IP="$(hostname -I | sed -e 's/[[:space:]]*$//')"
 
 # Update your Host file
-echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
+echo "$IP $HOSTNAME" | tee -a /etc/hosts
 
 # Update the landing page index file
 sed -i "s/host-ip/$IP/" landing_page/index.html
@@ -32,54 +32,55 @@ sed -i "s/host-ip/$IP/" landing_page/index.html
 ################################
 ########### Docker #############
 ################################
-sudo yum install -y docker
+yum install -y docker
 
 # Create non-Root users to manage Docker
-# You'll still need to run sudo docker [command] until you log out and back in OR run "newgrp - docker"
-# The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using sudo until a reboot.
-sudo groupadd docker
-sudo usermod -aG docker "$USER"
+# You'll still need to run docker [command] until you log out and back in OR run "newgrp - docker"
+# The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using until a reboot.
+groupadd docker
+usermod -aG docker "$USER"
 
 # Set Docker to start on boot
-sudo systemctl enable docker.service
+systemctl enable docker.service
 
 # Start the Docker services
-sudo systemctl start docker.service
+systemctl start docker.service
 
 # Create the CAPES network and data volume
-sudo docker network create capes
-sudo docker volume create portainer_data
+docker network create capes
+docker volume create portainer_data
 
 # Update Elasticsearch's folder permissions
-sudo mkdir -p /var/lib/docker/volumes/elasticsearch/thehive/_data
-sudo mkdir -p /var/lib/docker/volumes/elasticsearch{-1,-2,-3}/capes/_data
-sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch{-1,-2,-3}
-sudo chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
+mkdir -p /var/lib/docker/volumes/elasticsearch/thehive/_data
+mkdir -p /var/lib/docker/volumes/elasticsearch{-1,-2,-3}/capes/_data
+chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch{-1,-2,-3}
+chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch
 
 # Update permissionso on the Heartbeat and Metricbeat yml file
-sudo chown root: heartbeat.yml
-sudo chmod 0644 heartbeat.yml
-sudo chown root: metricbeat.yml
-sudo chmod 0644 metricbeat.yml
+chown root: heartbeat.yml
+chmod 0644 heartbeat.yml
+chown root: metricbeat.yml
+chmod 0644 metricbeat.yml
 
 # Adjust VM kernel setting for Elasticsearch
-sudo sysctl -w vm.max_map_count=262144
-sudo bash -c 'cat >> /etc/sysctl.conf <<EOF
+sysctl -w vm.max_map_count=262144
+bash -c 'cat >> /etc/sysctl.conf <<EOF
 vm.max_map_count=262144
 EOF'
 
 ## CAPES Databases ##
 
 # Etherpad MYSQL Container
-sudo docker run -d --network capes --restart unless-stopped --name capes-etherpad-mysql -v /var/lib/docker/volumes/mysql/etherpad/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=etherpad" -e "MYSQL_USER=etherpad" -e MYSQL_PASSWORD=$etherpad_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
+docker run -d --network capes --restart unless-stopped --name capes-etherpad-mysql -v /var/lib/docker/volumes/mysql/etherpad/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=etherpad" -e "MYSQL_USER=etherpad" -e MYSQL_PASSWORD=$etherpad_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # Gitea MYSQL Container
-sudo docker run -d --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
+docker run -d --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # TheHive & Cortex Elasticsearch Container
-sudo docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
+docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
 
 # Rocketchat MongoDB Container & Configuration
+
 sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
 sleep 5
 sudo docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  replSetName: \"rs01\"" | tee -a /etc/mongod.conf && mongo --eval "printjson(rs.initiate())"'
@@ -87,49 +88,49 @@ sudo docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  rep
 ## CAPES Services ##
 
 # Portainer Service
-sudo docker run --privileged -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
+docker run --privileged -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
 
 # Nginx Service
-sudo docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
+docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
 
 # Cyberchef Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
+docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
 
 # Gitea Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:latest
+docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:latest
 
 # Etherpad Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=$etherpad_admin_passphrase -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=$etherpad_mysql_passphrase -e "ETHERPAD_DB_NAME=etherpad" -p 5000:9001 tvelocity/etherpad-lite:latest
+docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=$etherpad_admin_passphrase -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=$etherpad_mysql_passphrase -e "ETHERPAD_DB_NAME=etherpad" -p 5000:9001 tvelocity/etherpad-lite:latest
 
 # TheHive Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-thehive -e CORTEX_URL=capes-cortex -p 9000:9000 thehiveproject/thehive:latest --es-hostname capes-thehive-elasticsearch --cortex-hostname capes-cortex
+docker run -d --network capes --restart unless-stopped --name capes-thehive -e CORTEX_URL=capes-cortex -p 9000:9000 thehiveproject/thehive:latest --es-hostname capes-thehive-elasticsearch --cortex-hostname capes-cortex
 
 # Cortex Service
-# sudo docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+# docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
 
 # Rocketchat Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e MONGO_OPLOG_URL=mongodb://capes-rocketchat-mongo:27017/local?replSet=rs01 -e ROOT_URL=http://$IP:4000 -p 4000:3000 rocketchat/rocket.chat:latest
+docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e MONGO_OPLOG_URL=mongodb://capes-rocketchat-mongo:27017/local?replSet=rs01 -e ROOT_URL=http://$IP:4000 -p 4000:3000 rocketchat/rocket.chat:latest
 
 # Mumble Service
-sudo docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
+docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64738:64738 -p 64738:64738/udp -v /var/lib/docker/volumes/mumble-data/_data:/data:z -e SUPW=$mumble_passphrase extra/mumble:latest
 
 ## CAPES Monitoring ##
 
 # CAPES Elasticsearch Nodes
-sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-1 -v /var/lib/docker/volumes/elasticsearch-1/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -p 9200:9200 -p 9300:9300 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-1" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-1 -v /var/lib/docker/volumes/elasticsearch-1/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -p 9200:9200 -p 9300:9300 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-1" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
 
-sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-2 -v /var/lib/docker/volumes/elasticsearch-2/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-2" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-3" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-2 -v /var/lib/docker/volumes/elasticsearch-2/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-2" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-3" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
 
-sudo docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-3 -v /var/lib/docker/volumes/elasticsearch-3/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-3" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-2" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-3 -v /var/lib/docker/volumes/elasticsearch-3/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-3" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-2" docker.elastic.co/elasticsearch/elasticsearch:7.0.1
 
 # CAPES Kibana
-sudo docker run -d --network capes --restart unless-stopped --name capes-kibana --network capes -p 5601:5601 --link capes-elasticsearch-1:elasticsearch docker.elastic.co/kibana/kibana:7.0.1
+docker run -d --network capes --restart unless-stopped --name capes-kibana --network capes -p 5601:5601 --link capes-elasticsearch-1:elasticsearch docker.elastic.co/kibana/kibana:7.0.1
 
 # CAPES Heartbeat
-sudo docker run -d --network capes --restart unless-stopped --name capes-heartbeat --network capes --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+docker run -d --network capes --restart unless-stopped --name capes-heartbeat --network capes --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # CAPES Metricbeat
-sudo docker run --privileged -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+docker run --privileged -d --network capes --restart unless-stopped --name capes-metricbeat --network capes --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.0.1 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # Wait for Elasticsearch to become available
 echo "Elasticsearch takes a bit to negotiate it's cluster settings and come up. Give it a minute."
@@ -167,8 +168,8 @@ curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/jso
 # Port 8000 - Cyberchef
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-sudo firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
-sudo firewall-cmd --reload
+firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
+firewall-cmd --reload
 
 ################################
 ######### Success Page #########
