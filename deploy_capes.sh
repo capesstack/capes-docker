@@ -145,7 +145,7 @@ do
     echo "Elasticsearch is up. Proceeding"
     break
   else
-    echo "Elasticsearch still loading ($STATUS). Trying again in 10 seconds"
+    echo "Elasticsearch still loading. Trying again in 10 seconds"
   fi
   sleep 10
 done
