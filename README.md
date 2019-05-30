@@ -2,10 +2,14 @@
 
 This is the repo for containerized CAPES. This will replace the non-containerized version.
 
-## Requirements
+## Supported Systems
 * Clean CentOS system
+* Tested on VMWare Photon OS as of 10 May 2019
 
-To deploy
+## Deploying
+
+Run the following:
+
 ```
 sudo yum install -y git
 git clone https://github.com/capesstack/capes-docker.git
