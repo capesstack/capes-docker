@@ -32,7 +32,8 @@ sed -i "s/host-ip/$IP/" landing_page/index.html
 ################################
 ########### Docker #############
 ################################
-yum install -y docker
+# Install Docker if needed
+if yum list installed "docker" >/dev/null 2>&1; then echo "Docker already installed. Moving on."; else yum install -y docker; fi
 
 # Create non-Root users to manage Docker
 # You'll still need to run docker [command] until you log out and back in OR run "newgrp - docker"
@@ -81,9 +82,9 @@ docker run -d --network capes --restart unless-stopped --name capes-thehive-elas
 
 # Rocketchat MongoDB Container & Configuration
 
-sudo docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
+docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
 sleep 5
-sudo docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  replSetName: \"rs01\"" | tee -a /etc/mongod.conf && mongo --eval "printjson(rs.initiate())"'
+docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  replSetName: \"rs01\"" | tee -a /etc/mongod.conf && mongo --eval "printjson(rs.initiate())"'
 
 ## CAPES Services ##
 
@@ -107,6 +108,9 @@ docker run -d --network capes --restart unless-stopped --name capes-thehive -e C
 
 # Cortex Service
 # docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+
+# Draw.io Service
+docker run -d --network capes --restart unless-stopped --name capes-draw.io -p 8001:8443 fjudith/draw.io
 
 # Rocketchat Service
 docker run -d --network capes --restart unless-stopped --name capes-rocketchat --link capes-rocketchat-mongo -e "MONGO_URL=mongodb://capes-rocketchat-mongo:27017/rocketchat" -e MONGO_OPLOG_URL=mongodb://capes-rocketchat-mongo:27017/local?replSet=rs01 -e ROOT_URL=http://$IP:4000 -p 4000:3000 rocketchat/rocket.chat:latest
@@ -158,18 +162,21 @@ curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/jso
 ################################
 ### Firewall Considerations ####
 ################################
+# Docker manages this for you with iptables, but in the event you need to add them.
 # Make firewall considerations
 # Port 80 - Nginx (landing page)
+# Port 2000 - Portainer
 # Port 3000 - Rocketchat
 # Port 4000 - Gitea
 # Port 5000 - Etherpad
 # Port 5601 - Kibana
 # Port 64738 - Mumble
 # Port 8000 - Cyberchef
+# Port 8001 - Draw.io
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-firewall-cmd --add-port=80/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
-firewall-cmd --reload
+# firewall-cmd --add-port=80/tcp --add-port=2000/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
+# firewall-cmd --reload
 
 ################################
 ######### Success Page #########
