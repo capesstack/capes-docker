@@ -79,7 +79,7 @@ EOF'
 docker run -d --network capes --restart unless-stopped --name capes-etherpad-mysql -v /var/lib/docker/volumes/mysql/etherpad/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=etherpad" -e "MYSQL_USER=etherpad" -e MYSQL_PASSWORD=$etherpad_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # Gitea MYSQL Container
-docker run -d --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
+docker run -d --network capes --restart unless-stopped --name capes-gitea-mysql -p 3306:3306 -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=$gitea_mysql_passphrase -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # TheHive & Cortex Elasticsearch Container
 docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
@@ -102,7 +102,7 @@ docker run -d  --network capes --restart unless-stopped --name capes-landing-pag
 docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
 
 # Gitea Service
-docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:1.8.2
+docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:latest
 
 # Etherpad Service
 docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=$etherpad_admin_passphrase -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=$etherpad_mysql_passphrase -e "ETHERPAD_DB_NAME=etherpad" -p 5000:9001 tvelocity/etherpad-lite:latest
