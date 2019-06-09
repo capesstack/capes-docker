@@ -14,7 +14,7 @@ heartbeat.monitors:
     - http://capes-etherpad:9001
     - http://capes-thehive:9000
 #    - http://capes-cortex:9000
-    - http://capes-rocketchat:4000
+    - http://capes-rocketchat:3000
 
 - type: icmp
   schedule: '@every 5s'
