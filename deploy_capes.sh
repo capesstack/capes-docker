@@ -177,8 +177,8 @@ curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/jso
 # Port 8001 - Draw.io
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-firewall-cmd --add-port=443/tcp --add-port=2000/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
-firewall-cmd --reload
+#firewall-cmd --add-port=443/tcp --add-port=2000/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
+#firewall-cmd --reload
 
 ################################
 ######### Success Page #########
