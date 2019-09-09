@@ -26,8 +26,8 @@ echo "${IP} ${HOSTNAME}" | tee -a /etc/hosts
 sed -i "s/host-ip/${IP}/" nginx/landing_page/index.html
 
 # Create SSL certificates
-# mkdir -p $(pwd)/nginx/ssl
-# openssl req -newkey rsa:2048 -nodes -keyout $(pwd)/nginx/ssl/capes.key -x509 -days 365 -out $(pwd)/nginx/ssl/capes.crt -subj "/C=US/ST=CAPES/L=CAPES/O=CAPES/OU=CAPES/CN=CAPES"
+mkdir -p $(pwd)/nginx/ssl
+openssl req -newkey rsa:2048 -nodes -keyout $(pwd)/nginx/ssl/capes.key -x509 -days 365 -out $(pwd)/nginx/ssl/capes.crt -subj "/C=US/ST=CAPES/L=CAPES/O=CAPES/OU=CAPES/CN=CAPES"
 
 ################################
 ########### Docker #############
@@ -83,7 +83,7 @@ docker run -d --network capes --restart unless-stopped --name capes-thehive-elas
 # docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "cluster.name=hive" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:6.8.0
 
 # Rocketchat MongoDB Container & Configuration
-docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:latest mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
+docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:4.0 mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
 sleep 5
 docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  replSetName: \"rs01\"" | tee -a /etc/mongod.conf && mongo --eval "printjson(rs.initiate())"'
 
@@ -93,8 +93,8 @@ docker exec -d capes-rocketchat-mongo bash -c 'echo -e "replication:\n  replSetN
 docker run --privileged -d --network capes --restart unless-stopped --name capes-portainer -v /var/lib/docker/volumes/portainer/_data:/data:z -v /var/run/docker.sock:/var/run/docker.sock -p 2000:9000 portainer/portainer:latest
 
 # Nginx Service
-docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/nginx/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
-# docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/nginx/ssl/capes.crt:/etc/nginx/capes.crt:z -v $(pwd)/nginx/ssl/capes.key:/etc/nginx/capes.key:z -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:z -v $(pwd)/nginx/landing_page:/usr/share/nginx/html:z -p 443:443 -p 80:80 nginx:latest
+# docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/nginx/landing_page:/usr/share/nginx/html:z -p 80:80 nginx:latest
+docker run -d  --network capes --restart unless-stopped --name capes-landing-page -v $(pwd)/nginx/ssl/capes.crt:/etc/nginx/capes.crt:z -v $(pwd)/nginx/ssl/capes.key:/etc/nginx/capes.key:z -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:z -v $(pwd)/nginx/landing_page:/usr/share/nginx/html:z -p 443:443 nginx:latest
 
 # Cyberchef Service
 docker run -d --network capes --restart unless-stopped --name capes-cyberchef -p 8000:8080 remnux/cyberchef:latest
@@ -166,7 +166,7 @@ curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/jso
 ################################
 # Docker manages this for you with iptables, but in the event you need to add them.
 # Make firewall considerations
-# Port 80 - Nginx (landing page)
+# Port 443 - Nginx (landing page)
 # Port 2000 - Portainer
 # Port 3000 - Rocketchat
 # Port 4000 - Gitea
@@ -177,12 +177,12 @@ curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/jso
 # Port 8001 - Draw.io
 # Port 9000 - TheHive
 # Port 9001 - Cortex (TheHive Analyzer Plugin)
-# firewall-cmd --add-port=80/tcp --add-port=2000/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
-# firewall-cmd --reload
+#firewall-cmd --add-port=443/tcp --add-port=2000/tcp --add-port=3000/tcp --add-port=4000/tcp --add-port=5000/tcp --add-port=5601/tcp --add-port=64738/tcp --add-port=64738/udp --add-port=8000/tcp --add-port=9000/tcp --add-port=9001/tcp --permanent
+#firewall-cmd --reload
 
 ################################
 ######### Success Page #########
 ################################
 clear
 echo "Please see the "Build, Operate, Maintain" documentation for the post-installation steps."
-echo "The CAPES landing page has been successfully deployed. Browse to http://${HOSTNAME} (or http://${IP} if you don't have DNS set up) to begin using the services."
+echo "The CAPES landing page has been successfully deployed. Browse to https://${HOSTNAME} (or https://${IP} if you don't have DNS set up) to begin using the services."
