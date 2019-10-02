@@ -8,7 +8,7 @@ heartbeat.monitors:
     - http://capes-kibana:5601
     - http://capes-thehive-elasticsearch:9200
     - http://capes-portainer:9000
-    - http://capes-landing-page:80
+    - https://capes-landing-page:443
     - http://capes-cyberchef:8080
     - http://capes-gitea:3000
     - http://capes-etherpad:9001
