@@ -36,7 +36,7 @@ openssl req -newkey rsa:2048 -nodes -keyout $(pwd)/nginx/ssl/capes.key -x509 -da
 if yum list installed "docker" >/dev/null 2>&1; then echo "Docker already installed. Moving on."; else yum install -y docker; fi
 
 # Create non-Root users to manage Docker
-# You'll still need to run docker [command] until you log out and back in OR run "newgrp - docker"
+# You'll still need to run sudo docker [command] until you log out and back in OR run "newgrp - docker"
 # The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using until a reboot.
 groupadd docker
 usermod -aG docker "${USER}"
@@ -51,7 +51,7 @@ systemctl start docker.service
 docker network create capes
 docker volume create portainer_data
 
-# Update Elasticsearch's folder permissions
+# Create & update Elasticsearch's folder permissions
 mkdir -p /var/lib/docker/volumes/elasticsearch/thehive/_data
 mkdir -p /var/lib/docker/volumes/elasticsearch{-1,-2,-3}/capes/_data
 chown -R 1000:1000 /var/lib/docker/volumes/elasticsearch{-1,-2,-3}
@@ -63,7 +63,7 @@ chmod 0644 heartbeat.yml
 chown root: metricbeat.yml
 chmod 0644 metricbeat.yml
 
-# Disable auditd so the Auditbeat can grab that process
+# Disable auditd so Auditbeat can grab that process
 auditctl -e0
 systemctl disable auditd
 
