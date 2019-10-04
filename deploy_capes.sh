@@ -63,6 +63,10 @@ chmod 0644 heartbeat.yml
 chown root: metricbeat.yml
 chmod 0644 metricbeat.yml
 
+# Disable auditd so the Auditbeat can grab that process
+auditctl -e0
+systemctl disable auditd
+
 # Adjust VM kernel setting for Elasticsearch
 sysctl -w vm.max_map_count=262144
 bash -c 'cat >> /etc/sysctl.conf <<EOF
@@ -135,7 +139,13 @@ docker run -d --network capes --restart unless-stopped --name capes-kibana -p 56
 docker run -d --network capes --restart unless-stopped --name capes-heartbeat --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.4.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # CAPES Metricbeat
-docker run --privileged -d --network capes --restart unless-stopped --name capes-metricbeat --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z docker.elastic.co/beats/metricbeat:7.4.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+docker run -d --network capes --restart unless-stopped --name capes-metricbeat --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z --privileged docker.elastic.co/beats/metricbeat:7.4.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+
+# CAPES Packetbeat
+docker run -d --network host --restart unless-stopped --name capes-packetbeat -v $(pwd)/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:z --cap-add="NET_RAW" --cap-add="NET_ADMIN" docker.elastic.co/beats/packetbeat:7.4.0 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
+
+# CAPES Auditbeat
+docker run -d --network host --restart unless-stopped --name capes-auditbeat --user=root -v $(pwd)/auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:z --pid=host --privileged=true docker.elastic.co/beats/auditbeat:7.4.0 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
 
 # Wait for Elasticsearch to become available
 echo "Elasticsearch takes a bit to negotiate it's cluster settings and come up. Give it a minute."

@@ -1,0 +1,16 @@
+packetbeat.interfaces.device: any
+
+packetbeat.flows:
+  timeout: 30s
+  period: 10s
+
+packetbeat.protocols.dns:
+  ports: [53]
+  include_authorities: true
+  include_additionals: true
+
+packetbeat.protocols.http:
+  ports: [80, 5601, 9200, 3000, 4000, 5000, 64738, 8000, 8001, 9000, 9001]
+
+packetbeat.protocols.tls:
+  ports: [443]
