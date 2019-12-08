@@ -27,7 +27,7 @@ sed -i "s/host-ip/${IP}/" nginx/landing_page/index.html
 
 # Create SSL certificates
 mkdir -p $(pwd)/nginx/ssl
-openssl req -newkey rsa:2048 -nodes -keyout $(pwd)/nginx/ssl/capes.key -x509 -days 365 -out $(pwd)/nginx/ssl/capes.crt -subj "/C=US/ST=CAPES/L=CAPES/O=CAPES/OU=CAPES/CN=CAPES"
+openssl req -newkey rsa:2048 -nodes -keyout $(pwd)/nginx/ssl/capes.key -x509 -sha256 -days 365 -out $(pwd)/nginx/ssl/capes.crt -subj "/C=US/ST=CAPES/L=CAPES/O=CAPES/OU=CAPES/CN=CAPES"
 
 ################################
 ########### Docker #############
