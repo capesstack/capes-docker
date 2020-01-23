@@ -107,10 +107,12 @@ docker run -d --network capes --restart unless-stopped --name capes-gitea -v /va
 docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=${etherpad_admin_passphrase} -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=${etherpad_mysql_passphrase} -e "ETHERPAD_DB_NAME=etherpad" tvelocity/etherpad-lite:latest
 
 # TheHive Service
+# The integration between TheHive and Cortex isn't working right now, but Cortex is prefectly usable. Issue opened with TheHive-Project https://github.com/TheHive-Project/TheHive/issues/1208
 docker run -d --network capes --restart unless-stopped --name capes-thehive -p 9000:9000 thehiveproject/thehive:3.4.0 --es-hostname capes-thehive-elasticsearch
 
 # Cortex Service
-# docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+# The integration between TheHive and Cortex isn't working right now, but Cortex is prefectly usable. Issue opened with TheHive-Project https://github.com/TheHive-Project/TheHive/issues/1208
+docker run --network capes --rm --name capes-cortex -p 9001:9001 thehiveproject/cortex:3.0.1 --es-hostname capes-thehive-elasticsearch
 
 # Draw.io Service
 docker run -d --network capes --restart unless-stopped --name capes-draw.io fjudith/draw.io
