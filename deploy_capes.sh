@@ -82,9 +82,7 @@ docker run -d --network capes --restart unless-stopped --name capes-etherpad-mys
 docker run -d --network capes --restart unless-stopped --name capes-gitea-mysql -v /var/lib/docker/volumes/mysql/gitea/_data:/var/lib/mysql:z -e "MYSQL_DATABASE=gitea" -e "MYSQL_USER=gitea" -e MYSQL_PASSWORD=${gitea_mysql_passphrase} -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" mysql:5.7
 
 # TheHive & Cortex Elasticsearch Container
-docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.inline=true" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:5.6.13
-# Prepping for TheHive 3.4
-# docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "cluster.name=hive" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" docker.elastic.co/elasticsearch/elasticsearch:6.8.0
+docker run -d --network capes --restart unless-stopped --name capes-thehive-elasticsearch -v /var/lib/docker/volumes/elasticsearch/thehive/_data:/usr/share/elasticsearch/data:z -e "http.host=0.0.0.0" -e "transport.host=0.0.0.0" -e "xpack.security.enabled=false" -e "cluster.name=hive" -e "script.allowed_types=inline" -e "thread_pool.index.queue_size=100000" -e "thread_pool.search.queue_size=100000" -e "thread_pool.bulk.queue_size=100000" --ulimit nofile=65536:65536 docker.elastic.co/elasticsearch/elasticsearch:6.8.0
 
 # Rocketchat MongoDB Container & Configuration
 docker run -d --network capes --restart unless-stopped --name capes-rocketchat-mongo -v /var/lib/docker/volumes/rocketchat/_data:/data/db:z -v /var/lib/docker/volumes/rocketchat/dump/_data:/dump:z mongo:4.0 mongod --smallfiles --oplogSize 128 --replSet rs1 --storageEngine=mmapv1
@@ -109,10 +107,12 @@ docker run -d --network capes --restart unless-stopped --name capes-gitea -v /va
 docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=${etherpad_admin_passphrase} -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=${etherpad_mysql_passphrase} -e "ETHERPAD_DB_NAME=etherpad" tvelocity/etherpad-lite:latest
 
 # TheHive Service
-docker run -d --network capes --restart unless-stopped --name capes-thehive -e CORTEX_URL=capes-cortex -p 9000:9000 thehiveproject/thehive:latest --es-hostname capes-thehive-elasticsearch --cortex-hostname capes-cortex
+# The integration between TheHive and Cortex isn't working right now, but Cortex is prefectly usable. Issue opened with TheHive-Project https://github.com/TheHive-Project/TheHive/issues/1208
+docker run -d --network capes --restart unless-stopped --name capes-thehive -p 9000:9000 thehiveproject/thehive:3.4.0 --es-hostname capes-thehive-elasticsearch
 
 # Cortex Service
-# docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9000 thehiveproject/cortex:latest --es-hostname capes-thehive-elasticsearch
+# The integration between TheHive and Cortex isn't working right now, but Cortex is prefectly usable. Issue opened with TheHive-Project https://github.com/TheHive-Project/TheHive/issues/1208
+docker run --network capes --rm --name capes-cortex -p 9001:9001 thehiveproject/cortex:3.0.1 --es-hostname capes-thehive-elasticsearch
 
 # Draw.io Service
 docker run -d --network capes --restart unless-stopped --name capes-draw.io fjudith/draw.io
