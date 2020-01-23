@@ -112,7 +112,7 @@ docker run -d --network capes --restart unless-stopped --name capes-thehive -p 9
 
 # Cortex Service
 # The integration between TheHive and Cortex isn't working right now, but Cortex is prefectly usable. Issue opened with TheHive-Project https://github.com/TheHive-Project/TheHive/issues/1208
-docker run -d --network capes --rm --name capes-cortex -p 9001:9001 thehiveproject/cortex:3.0.1 --es-hostname capes-thehive-elasticsearch
+docker run -d --network capes --restart unless-stopped --name capes-cortex -p 9001:9001 thehiveproject/cortex:3.0.1 --es-hostname capes-thehive-elasticsearch
 
 # Draw.io Service
 docker run -d --network capes --restart unless-stopped --name capes-draw.io fjudith/draw.io
