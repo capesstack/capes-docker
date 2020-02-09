@@ -118,6 +118,9 @@ docker run -d --network capes --restart unless-stopped --name capes-thehive -v $
 # https://github.com/TheHive-Project/TheHiveDocs/blob/master/admin/configuration.md#6-cortex
 docker run -d --network capes --restart unless-stopped --name capes-cortex thehiveproject/cortex:3.0.1 --es-hostname capes-thehive-elasticsearch
 
+# TheHive Template Import Preparation 
+docker build -t capes/thehivetemplateimport .
+
 # Draw.io Service
 docker run -d --network capes --restart unless-stopped --name capes-draw.io fjudith/draw.io
 
