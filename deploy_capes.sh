@@ -133,26 +133,26 @@ docker run -d --network capes --restart unless-stopped --name capes-mumble -p 64
 ## CAPES Monitoring ##
 
 # CAPES Elasticsearch Nodes
-docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-1 -v /var/lib/docker/volumes/elasticsearch-1/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -p 127.0.0.1:9200:9200 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-1" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-1 -v /var/lib/docker/volumes/elasticsearch-1/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -p 127.0.0.1:9200:9200 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-1" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" docker.elastic.co/elasticsearch/elasticsearch:7.7.0
 
-docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-2 -v /var/lib/docker/volumes/elasticsearch-2/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-2" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-3" docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-2 -v /var/lib/docker/volumes/elasticsearch-2/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-2" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-3" docker.elastic.co/elasticsearch/elasticsearch:7.7.0
 
-docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-3 -v /var/lib/docker/volumes/elasticsearch-3/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-3" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-2" docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+docker run -d --network capes --restart unless-stopped --name capes-elasticsearch-3 -v /var/lib/docker/volumes/elasticsearch-3/capes/_data:/usr/share/elasticsearch/data:z --ulimit memlock=-1:-1 -e "cluster.name=capes" -e "node.name=capes-elasticsearch-3" -e "cluster.initial_master_nodes=capes-elasticsearch-1" -e "bootstrap.memory_lock=true" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.seed_hosts=capes-elasticsearch-1,capes-elasticsearch-2" docker.elastic.co/elasticsearch/elasticsearch:7.7.0
 
 # CAPES Kibana
-docker run -d --network capes --restart unless-stopped --name capes-kibana -e SERVER_BASEPATH=/kibana --link capes-elasticsearch-1:elasticsearch docker.elastic.co/kibana/kibana:7.6.2
+docker run -d --network capes --restart unless-stopped --name capes-kibana -e SERVER_BASEPATH=/kibana --link capes-elasticsearch-1:elasticsearch docker.elastic.co/kibana/kibana:7.7.0
 
 # CAPES Heartbeat
-docker run -d --network capes --restart unless-stopped --name capes-heartbeat --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.6.2 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+docker run -d --network capes --restart unless-stopped --name capes-heartbeat --user=heartbeat -v $(pwd)/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:z docker.elastic.co/beats/heartbeat:7.7.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # CAPES Metricbeat
-docker run -d --network capes --restart unless-stopped --name capes-metricbeat --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z --privileged docker.elastic.co/beats/metricbeat:7.6.2 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
+docker run -d --network capes --restart unless-stopped --name capes-metricbeat --user=root -v $(pwd)/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:z -v /var/run/docker.sock:/var/run/docker.sock:z -v /sys/fs/cgroup:/hostfs/sys/fs/cgroup:z -v /proc:/hostfs/proc:z -v /:/hostfs:z --privileged docker.elastic.co/beats/metricbeat:7.7.0 -e -E output.elasticsearch.hosts=["capes-elasticsearch-1:9200"]
 
 # CAPES Packetbeat
-docker run -d --network host --restart unless-stopped --name capes-packetbeat -v $(pwd)/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:z --cap-add="NET_RAW" --cap-add="NET_ADMIN" docker.elastic.co/beats/packetbeat:7.6.2 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
+docker run -d --network host --restart unless-stopped --name capes-packetbeat -v $(pwd)/packetbeat.yml:/usr/share/packetbeat/packetbeat.yml:z --cap-add="NET_RAW" --cap-add="NET_ADMIN" docker.elastic.co/beats/packetbeat:7.7.0 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
 
 # CAPES Auditbeat
-docker run -d --network host --restart unless-stopped --name capes-auditbeat --user=root -v $(pwd)/auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:z --pid=host --privileged=true docker.elastic.co/beats/auditbeat:7.6.2 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
+docker run -d --network host --restart unless-stopped --name capes-auditbeat --user=root -v $(pwd)/auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:z --pid=host --privileged=true docker.elastic.co/beats/auditbeat:7.7.0 --strict.perms=false -e -E output.elasticsearch.hosts=["127.0.0.1:9200"]
 
 # Wait for Elasticsearch to become available
 echo "Elasticsearch takes a bit to negotiate it's cluster settings and come up. Give it a minute."

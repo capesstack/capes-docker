@@ -14,3 +14,6 @@ packetbeat.protocols.http:
 
 packetbeat.protocols.tls:
   ports: [443]
+
+packetbeat.protocols.mysql:
+  ports: [3306,3307]
