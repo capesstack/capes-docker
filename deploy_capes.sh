@@ -101,7 +101,7 @@ docker run -d  --network capes --restart unless-stopped --name capes-landing-pag
 docker run -d --network capes --restart unless-stopped --name capes-cyberchef remnux/cyberchef:latest
 
 # Gitea Service
-docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "VIRTUAL_PORT=3000" -e "VIRTUAL_HOST=capes-gitea" -p 2222:22 -p 3000:3000 gitea/gitea:latest
+docker run -d --network capes --restart unless-stopped --name capes-gitea -v /var/lib/docker/volumes/gitea/_data:/data:z -e "DB_TYPE=mysql" -e "DB_HOST=capes-gitea-mysql:3306" -e "DB_NAME=gitea" -e "DB_USER=gitea" -e DB_PASSWD=${gitea_mysql_passphrase} -p 2222:22 -p 3000:3000 gitea/gitea:latest
 
 # Etherpad Service
 docker run -d --network capes --restart unless-stopped --name capes-etherpad -e "ETHERPAD_TITLE=CAPES" -e "ETHERPAD_PORT=9001" -e ETHERPAD_ADMIN_PASSWORD=${etherpad_admin_passphrase} -e "ETHERPAD_ADMIN_USER=admin" -e "ETHERPAD_DB_TYPE=mysql" -e "ETHERPAD_DB_HOST=capes-etherpad-mysql" -e "ETHERPAD_DB_USER=etherpad" -e ETHERPAD_DB_PASSWORD=${etherpad_mysql_passphrase} -e "ETHERPAD_DB_NAME=etherpad" tvelocity/etherpad-lite:latest
