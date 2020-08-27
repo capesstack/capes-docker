@@ -9,7 +9,7 @@ heartbeat.monitors:
     - http://capes-thehive-elasticsearch:9200
     - http://capes-portainer:9000
     - https://capes-landing-page:443
-    - http://capes-cyberchef:8080
+    - http://capes-cyberchef:8000
     - http://capes-gitea:3000
     - http://capes-etherpad:9001
     - http://capes-thehive:9000
