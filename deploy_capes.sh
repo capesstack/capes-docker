@@ -61,6 +61,7 @@ if yum list installed "docker" >/dev/null 2>&1; then echo "Docker already instal
 # The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using until a reboot.
 groupadd docker
 usermod -aG docker "${USER}"
+newgrp docker
 
 # Set Docker to start on boot
 systemctl enable docker.service
