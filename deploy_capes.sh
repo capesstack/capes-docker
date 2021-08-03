@@ -17,9 +17,9 @@ cortex_ver=3.0.1
 drawio_ver=latest
 rocketchat_ver=latest
 mumble_ver=latest
-capes_elasticsearch_ver=7.10.0
-capes_beats_ver=7.10.0
-capes_kibana_ver=7.10.0
+capes_elasticsearch_ver=7.13.4
+capes_beats_ver=7.13.4
+capes_kibana_ver=7.13.4
 
 ################################
 ##### Credential Creation ######
@@ -61,6 +61,7 @@ if yum list installed "docker" >/dev/null 2>&1; then echo "Docker already instal
 # The "newgrp - docker" command starts a subshell that prevents this autobuild script from completing, so we'll just keep using until a reboot.
 groupadd docker
 usermod -aG docker "${USER}"
+newgrp docker
 
 # Set Docker to start on boot
 systemctl enable docker.service

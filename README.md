@@ -22,7 +22,5 @@ Passwords are written to `~/capes_credentials.txt` in the event that they're nee
 Please see the documentation, especially the [Post Installation Documentation](https://github.com/capesstack/capes-docs#post-installation).
 
 To do:
-* SSL reverse proxy (HTTPS everywhere)
 * Moar Beats (Metric, audit)
 * Documentation (yay)
-* Integrate additional services from TheHive Project (Hippocampe, Cortex)
