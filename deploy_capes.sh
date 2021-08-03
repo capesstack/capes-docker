@@ -17,9 +17,9 @@ cortex_ver=3.0.1
 drawio_ver=latest
 rocketchat_ver=latest
 mumble_ver=latest
-capes_elasticsearch_ver=7.13.4
-capes_beats_ver=7.13.4
-capes_kibana_ver=7.13.4
+capes_elasticsearch_ver=7.14.0
+capes_beats_ver=7.14.0
+capes_kibana_ver=7.14.0
 
 ################################
 ##### Credential Creation ######
